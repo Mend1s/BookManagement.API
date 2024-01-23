@@ -1,4 +1,4 @@
-﻿namespace BookManagement.API.Models;
+﻿namespace BookManagement.Application.InputModels;
 
 public class UpdateBookModel
 {
