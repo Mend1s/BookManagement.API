@@ -1,48 +1,97 @@
 ﻿using BookManagement.API.Models;
+using BookManagement.Application.InputModels;
+using BookManagement.Application.ViewModels;
+using BookManagement.Core.Entities;
+using BookManagement.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.API.Controllers;
 
 [Route("api/[controller]")]
 public class BooksController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult GetAll()
+    private readonly BooksManagementDbContext _dbContext;
+    public BooksController(BooksManagementDbContext dbContext)
     {
-        return Ok();
+        _dbContext = dbContext;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<BookViewModel>>> GetAll()
+    {
+        var books = await _dbContext.Books.ToListAsync();
+
+        if (books is null) return BadRequest();
+
+        var bookViewModel = books.Select(book => new BookViewModel
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Author = book.Author,
+            ISBN = book.ISBN,
+            YearOfPublication = book.YearOfPublication
+        }).ToList();
+
+        return bookViewModel;
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<ActionResult<BookViewModel>> GetById(int id)
     {
-        return Ok();
+        var book = await _dbContext.Books.SingleOrDefaultAsync(b => b.Id == id);
+
+        if (book is null) return NotFound();
+
+        var bookViewModel = new BookViewModel
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Author = book.Author,
+            ISBN = book.ISBN,
+            YearOfPublication = book.YearOfPublication
+        };
+        
+        return bookViewModel;
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] CreateBookModel createBookModel)
+    public async Task<IActionResult> Post([FromBody] CreateBookInputModel createBookInputModel)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var book = new Book(createBookInputModel.Title, createBookInputModel.Author, createBookInputModel.ISBN, createBookInputModel.YearOfPublication);
 
-        return CreatedAtAction(nameof(GetById), new { id = createBookModel.Id }, createBookModel);
+        await _dbContext.Books.AddAsync(book);
+
+        await _dbContext.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = book.Id }, createBookInputModel);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] UpdateBookModel updateBookModel)
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateBookModel updateBookModel)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var book = _dbContext.Books.SingleOrDefault(b => b.Id == id);
 
-        return NoContent();
+        if (book is null) return BadRequest();
+
+        book.UpdateBook(updateBookModel.Title, updateBookModel.Author, updateBookModel.ISBN, updateBookModel.YearOfPublication);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(book);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        return NoContent();
+        var book = _dbContext.Books.SingleOrDefault(b => b.Id == id);
+
+        if (book is null) return NotFound();
+
+        _dbContext.Books.Remove(book);
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(book);
     }
 }

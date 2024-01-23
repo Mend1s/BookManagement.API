@@ -1,9 +1,7 @@
-﻿namespace BookManagement.API.Models;
+﻿namespace BookManagement.Application.InputModels;
 
-public class CreateBookModel
+public class CreateBookInputModel
 {
-    // verificar se é pra tirar esse tipo de model ou nao
-    public int Id { get; set; }
     public string Title { get; set; }
     public string Author { get; set; }
     public string ISBN { get; set; }
