@@ -4,11 +4,10 @@ namespace BookManagement.Core.Entities;
 
 public class Loan : BaseEntity
 {
-    public Loan(int idUser, int idBook, DateTime loanDate)
+    public Loan(int idUser, int idBook)
     {
         IdUser = idUser;
         IdBook = idBook;
-        LoanDate = loanDate;
     }
 
     public int IdUser { get; private set; }
@@ -17,10 +16,17 @@ public class Loan : BaseEntity
     public int IdBook { get; private set; }
     [JsonIgnore]
     public Book Book { get; private set; }
-    public DateTime LoanDate { get; private set; }
+    public DateTime LoanDate { get; private set; } = DateTime.Now;
+    public DateTime Devolution { get; private set; } = DateTime.Now.Date.AddDays(10);
 
-    public void UpdateLoan()
+    public void UpdateLoan(int idUser, int idBook)
     {
-        LoanDate = DateTime.Now;
+        IdUser = idUser;
+        IdBook = idBook;
+    }
+
+    public void LoanRenewal(DateTime date)
+    {
+        Devolution = date;
     }
 }
