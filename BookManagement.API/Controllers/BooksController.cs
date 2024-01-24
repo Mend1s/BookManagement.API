@@ -1,8 +1,7 @@
 ﻿using BookManagement.Application.Commands.CreateBook;
 using BookManagement.Application.Commands.DeleteBook;
-using BookManagement.Application.InputModels;
+using BookManagement.Application.Commands.UpdateBook;
 using BookManagement.Application.ViewModels;
-using BookManagement.Core.Entities;
 using BookManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -70,17 +69,18 @@ public class BooksController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] UpdateBookModel updateBookModel)
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateBookCommand updateBookCommand)
     {
-        var book = _dbContext.Books.SingleOrDefault(b => b.Id == id);
+        var command = new UpdateBookCommand
+            (id,
+            updateBookCommand.Title,
+            updateBookCommand.Author,
+            updateBookCommand.ISBN,
+            updateBookCommand.YearOfPublication);
 
-        if (book is null) return BadRequest();
+        await _mediator.Send(command);
 
-        book.UpdateBook(updateBookModel.Title, updateBookModel.Author, updateBookModel.ISBN, updateBookModel.YearOfPublication);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(book);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
