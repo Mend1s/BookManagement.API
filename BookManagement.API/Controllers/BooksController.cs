@@ -2,11 +2,11 @@
 using BookManagement.Application.Commands.DeleteBook;
 using BookManagement.Application.Commands.UpdateBook;
 using BookManagement.Application.Queries.GetAllBooks;
+using BookManagement.Application.Queries.GetBookById;
 using BookManagement.Application.ViewModels;
 using BookManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.API.Controllers;
 
@@ -34,20 +34,13 @@ public class BooksController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<BookViewModel>> GetById(int id)
     {
-        var book = await _dbContext.Books.SingleOrDefaultAsync(b => b.Id == id);
+        var bookId = new GetBookByIdQuery(id);
 
-        if (book is null) return NotFound();
+        var bookResult = await _mediator.Send(bookId);
 
-        var bookViewModel = new BookViewModel
-        {
-            Id = book.Id,
-            Title = book.Title,
-            Author = book.Author,
-            ISBN = book.ISBN,
-            YearOfPublication = book.YearOfPublication
-        };
+        if (bookResult is null) return NotFound();
 
-        return bookViewModel;
+        return Ok(bookResult);
     }
 
     [HttpPost]

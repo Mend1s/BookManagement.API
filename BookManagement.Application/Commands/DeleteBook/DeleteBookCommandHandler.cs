@@ -1,5 +1,6 @@
 ﻿using BookManagement.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.DeleteBook;
 
@@ -12,7 +13,7 @@ public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, Unit>
     }
     public async Task<Unit> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
     {
-        var book = _dbContext.Books.SingleOrDefault(b => b.Id == request.Id);
+        var book = await _dbContext.Books.SingleOrDefaultAsync(b => b.Id == request.Id);
 
         _dbContext.Books.Remove(book);
 

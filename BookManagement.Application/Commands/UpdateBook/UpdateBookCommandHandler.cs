@@ -1,6 +1,6 @@
-﻿using BookManagement.Application.InputModels;
-using BookManagement.Infrastructure.Persistence;
+﻿using BookManagement.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.UpdateBook;
 
@@ -13,7 +13,7 @@ public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, Unit>
     }
     public async Task<Unit> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
     {
-        var book = _dbContext.Books.SingleOrDefault(b => b.Id == request.Id);
+        var book = await _dbContext.Books.SingleOrDefaultAsync(b => b.Id == request.Id);
 
         book.UpdateBook(request.Title, request.Author, request.ISBN, request.YearOfPublication);
 
