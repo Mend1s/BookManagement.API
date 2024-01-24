@@ -1,6 +1,7 @@
 ﻿using BookManagement.Application.Commands.CreateBook;
 using BookManagement.Application.Commands.DeleteBook;
 using BookManagement.Application.Commands.UpdateBook;
+using BookManagement.Application.Queries.GetAllBooks;
 using BookManagement.Application.ViewModels;
 using BookManagement.Infrastructure.Persistence;
 using MediatR;
@@ -23,20 +24,11 @@ public class BooksController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BookViewModel>>> GetAll()
     {
-        var books = await _dbContext.Books.ToListAsync();
+        var query = new GetAllBookQuery();
 
-        if (books is null) return BadRequest();
+        var books = await _mediator.Send(query);
 
-        var bookViewModel = books.Select(book => new BookViewModel
-        {
-            Id = book.Id,
-            Title = book.Title,
-            Author = book.Author,
-            ISBN = book.ISBN,
-            YearOfPublication = book.YearOfPublication
-        }).ToList();
-
-        return bookViewModel;
+        return Ok(books);
     }
 
     [HttpGet("{id}")]
@@ -54,7 +46,7 @@ public class BooksController : ControllerBase
             ISBN = book.ISBN,
             YearOfPublication = book.YearOfPublication
         };
-        
+
         return bookViewModel;
     }
 
