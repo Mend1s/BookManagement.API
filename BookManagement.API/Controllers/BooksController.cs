@@ -60,7 +60,7 @@ public class BooksController : ControllerBase
             (id,
             updateBookCommand.Title,
             updateBookCommand.Author,
-            updateBookCommand.ISBN,
+            updateBookCommand.Isbn,
             updateBookCommand.YearOfPublication);
 
         await _mediator.Send(command);

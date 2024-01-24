@@ -18,6 +18,6 @@ public class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, BookVie
 
         if (book is null) return null;
 
-        return new BookViewModel(book.Id, book.Title, book.Author, book.ISBN, book.YearOfPublication);
+        return new BookViewModel(book.Id, book.Title, book.Author, book.Isbn, book.YearOfPublication);
     }
 }

@@ -15,7 +15,7 @@ public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, Unit>
     {
         var book = await _dbContext.Books.SingleOrDefaultAsync(b => b.Id == request.Id);
 
-        book.UpdateBook(request.Title, request.Author, request.ISBN, request.YearOfPublication);
+        book.UpdateBook(request.Title, request.Author, request.Isbn, request.YearOfPublication);
 
         await _dbContext.SaveChangesAsync();
 

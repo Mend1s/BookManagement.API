@@ -16,7 +16,7 @@ namespace BookManagement.Application.Queries.GetAllBooks
         {
             var books =  _dbContext.Books;
 
-            var booksViewModel = await books.Select(b => new BookViewModel(b.Id, b.Title, b.Author, b.ISBN, b.YearOfPublication)).ToListAsync();
+            var booksViewModel = await books.Select(b => new BookViewModel(b.Id, b.Title, b.Author, b.Isbn, b.YearOfPublication)).ToListAsync();
 
             return booksViewModel;
         }

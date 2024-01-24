@@ -10,5 +10,5 @@ public class GetBookByIdQuery : IRequest<BookViewModel>
         Id = id;
     }
 
-    public int Id { get; set; }
+    public int Id { get; private set; }
 }
