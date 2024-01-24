@@ -1,7 +1,10 @@
-﻿using BookManagement.Application.InputModels;
+﻿using BookManagement.Application.Commands.CreateBook;
+using BookManagement.Application.Commands.DeleteBook;
+using BookManagement.Application.InputModels;
 using BookManagement.Application.ViewModels;
 using BookManagement.Core.Entities;
 using BookManagement.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +14,11 @@ namespace BookManagement.API.Controllers;
 public class BooksController : ControllerBase
 {
     private readonly BooksManagementDbContext _dbContext;
-    public BooksController(BooksManagementDbContext dbContext)
+    private readonly IMediator _mediator;
+    public BooksController(BooksManagementDbContext dbContext, IMediator mediator)
     {
         _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -55,15 +60,13 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CreateBookInputModel createBookInputModel)
+    public async Task<IActionResult> Post([FromBody] CreateBookCommand command)
     {
-        var book = new Book(createBookInputModel.Title, createBookInputModel.Author, createBookInputModel.ISBN, createBookInputModel.YearOfPublication);
+        if (command is null) return BadRequest();
 
-        await _dbContext.Books.AddAsync(book);
+        var id = await _mediator.Send(command);
 
-        await _dbContext.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = book.Id }, createBookInputModel);
+        return CreatedAtAction(nameof(GetById), new { id = id }, command);
     }
 
     [HttpPut("{id}")]
@@ -83,14 +86,10 @@ public class BooksController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var book = _dbContext.Books.SingleOrDefault(b => b.Id == id);
+        var command = new DeleteBookCommand(id);
 
-        if (book is null) return NotFound();
+        await _mediator.Send(command);
 
-        _dbContext.Books.Remove(book);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(book);
+        return NoContent();
     }
 }
