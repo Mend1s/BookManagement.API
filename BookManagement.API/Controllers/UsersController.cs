@@ -1,13 +1,11 @@
 ﻿using BookManagement.Application.Commands.CreateUser;
 using BookManagement.Application.Commands.DeleteUser;
 using BookManagement.Application.Commands.UpdateUser;
-using BookManagement.Application.InputModels;
+using BookManagement.Application.Queries.GetAllUsers;
+using BookManagement.Application.Queries.GetUserById;
 using BookManagement.Application.ViewModels;
-using BookManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
 
 namespace BookManagement.API.Controllers;
 
@@ -15,45 +13,31 @@ namespace BookManagement.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly BooksManagementDbContext _dbContext;
-	public UsersController(BooksManagementDbContext dbContext, IMediator mediator)
+	public UsersController(IMediator mediator)
 	{
         _mediator = mediator;
-		_dbContext = dbContext;
 	}
 
 	[HttpGet]
 	public async Task<ActionResult<IEnumerable<UserViewModel>>> GetAll()
 	{
-        var users = await _dbContext.Users.ToListAsync();
+        var query = new GetAllUsersQuery();
 
-        if (users is null) return BadRequest();
+        var result = await _mediator.Send(query);
 
-        var userViewModel = users.Select(user => new UserViewModel
-		{
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-        }).ToList();
-
-        return userViewModel;
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<UserViewModel>> GetById(int id)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var userId = new GetUserByIdQuery(id);
 
-        if (user is null) return NotFound();
+        var userResult = await _mediator.Send(userId);
 
-        var userViewModel = new UserViewModel
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-        };
+        if (userResult is null) return NotFound();
         
-        return userViewModel;
+        return Ok(userResult);
     }
 
     [HttpPost]

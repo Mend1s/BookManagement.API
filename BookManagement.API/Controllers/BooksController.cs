@@ -4,7 +4,6 @@ using BookManagement.Application.Commands.UpdateBook;
 using BookManagement.Application.Queries.GetAllBooks;
 using BookManagement.Application.Queries.GetBookById;
 using BookManagement.Application.ViewModels;
-using BookManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +12,9 @@ namespace BookManagement.API.Controllers;
 [Route("api/[controller]")]
 public class BooksController : ControllerBase
 {
-    private readonly BooksManagementDbContext _dbContext;
     private readonly IMediator _mediator;
-    public BooksController(BooksManagementDbContext dbContext, IMediator mediator)
+    public BooksController(IMediator mediator)
     {
-        _dbContext = dbContext;
         _mediator = mediator;
     }
 
