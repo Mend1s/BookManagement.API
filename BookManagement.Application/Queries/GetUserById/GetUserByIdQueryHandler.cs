@@ -1,20 +1,19 @@
 ﻿using BookManagement.Application.ViewModels;
-using BookManagement.Infrastructure.Persistence;
+using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserViewModel>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public GetUserByIdQueryHandler(BooksManagementDbContext dbContext)
+    private readonly IUserRepository _userRepository;
+    public GetUserByIdQueryHandler(IUserRepository userRepository)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
     }
     public async Task<UserViewModel> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == request.Id);
+        var user = await _userRepository.GetByIdAsync(request.Id);
 
         if (user is null) return null;
 

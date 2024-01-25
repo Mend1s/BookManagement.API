@@ -1,22 +1,27 @@
 ﻿using BookManagement.Application.ViewModels;
-using BookManagement.Infrastructure.Persistence;
+using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Queries.GetAllUsers;
 
 public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserViewModel>>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public GetAllUsersQueryHandler(BooksManagementDbContext dbContext)
+    private readonly IUserRepository _userRepository;
+
+    public GetAllUsersQueryHandler(IUserRepository userRepository)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
     }
     public async Task<List<UserViewModel>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = _dbContext.Users;
+        var users = await _userRepository.GetAllAsync();
 
-        var usersViewModel = await users.Select(u => new UserViewModel(u.Id, u.Name, u.Email)).ToListAsync();
+        var usersViewModel = users
+            .Select(u => new UserViewModel(
+                u.Id,
+                u.Name,
+                u.Email))
+            .ToList();
 
         return usersViewModel;
     }

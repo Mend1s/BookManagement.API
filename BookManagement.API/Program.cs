@@ -13,6 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(opt => opt.RegisterServicesFromAssembly(typeof(CreateBookCommand).Assembly));
 
 builder.Services.AddScoped<IBookReposiroty, BookRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

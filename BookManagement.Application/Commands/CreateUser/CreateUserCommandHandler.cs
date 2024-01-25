@@ -1,23 +1,21 @@
 ﻿using BookManagement.Core.Entities;
-using BookManagement.Infrastructure.Persistence;
+using BookManagement.Core.Repositories;
 using MediatR;
 
 namespace BookManagement.Application.Commands.CreateUser;
 
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, int>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public CreateUserCommandHandler(BooksManagementDbContext dbContext)
+    private readonly IUserRepository _userRepository;
+    public CreateUserCommandHandler(IUserRepository userRepository)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
     }
     public async Task<int> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var user = new User(request.Name, request.Email);
 
-        await _dbContext.Users.AddAsync(user);
-
-        await _dbContext.SaveChangesAsync();
+        await _userRepository.CreateAsync(user);
 
         return user.Id;
     }

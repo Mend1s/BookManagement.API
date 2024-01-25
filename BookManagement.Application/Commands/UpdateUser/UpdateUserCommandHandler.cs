@@ -1,23 +1,22 @@
-﻿using BookManagement.Infrastructure.Persistence;
+﻿using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.UpdateUser;
 
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public UpdateUserCommandHandler(BooksManagementDbContext dbContext)
+    private readonly IUserRepository _userRepository;
+    public UpdateUserCommandHandler(IUserRepository userRepository)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
     }
     public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == request.Id);
+        var user = await _userRepository.GetByIdAsync(request.Id);
 
         user.UpdateUser(request.Name, request.Email);
 
-        await _dbContext.SaveChangesAsync();
+        await _userRepository.UpdateAsync(user);
 
         return Unit.Value;
     }
