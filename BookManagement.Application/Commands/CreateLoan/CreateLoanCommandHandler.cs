@@ -1,26 +1,21 @@
 ﻿using BookManagement.Core.Entities;
-using BookManagement.Infrastructure.Persistence;
+using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.CreateLoan;
 
 public class CreateLoanCommandHandler : IRequestHandler<CreateLoanCommand, int>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public CreateLoanCommandHandler(BooksManagementDbContext dbContext)
+    private readonly ILoanRepository _loanRepository;
+    public CreateLoanCommandHandler(ILoanRepository loanRepository)
     {
-        _dbContext = dbContext;
+        _loanRepository = loanRepository;
     }
     public async Task<int> Handle(CreateLoanCommand request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == request.IdUser);
-
         var loan = new Loan(request.IdUser, request.IdBook);
 
-        await _dbContext.Loans.AddAsync(loan);
-
-        await _dbContext.SaveChangesAsync();
+        await _loanRepository.CreateAsync(loan);
 
         return loan.Id;
     }

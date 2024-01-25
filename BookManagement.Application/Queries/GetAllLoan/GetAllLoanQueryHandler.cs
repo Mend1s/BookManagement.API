@@ -16,7 +16,7 @@ public class GetAllLoanQueryHandler : IRequestHandler<GetAllLoanQuery, List<Loan
     {
         var loans = _dbContext.Loans;
 
-        var loansViewModel = await loans.Select(l => new LoanViewModel(l.Id, l.IdBook, l.IdUser, l.LoanDate, l.Devolution)).ToListAsync();
+        var loansViewModel = await loans.Select(l => new LoanViewModel(l.Id, l.IdUser, l.IdBook, l.LoanDate, l.Devolution)).ToListAsync();
 
         return loansViewModel;
     }

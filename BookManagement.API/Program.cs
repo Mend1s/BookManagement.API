@@ -14,6 +14,7 @@ builder.Services.AddMediatR(opt => opt.RegisterServicesFromAssembly(typeof(Creat
 
 builder.Services.AddScoped<IBookReposiroty, BookRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

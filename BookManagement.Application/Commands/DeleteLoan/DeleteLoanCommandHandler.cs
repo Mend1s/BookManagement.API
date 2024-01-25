@@ -1,23 +1,20 @@
-﻿using BookManagement.Infrastructure.Persistence;
+﻿using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.DeleteLoan;
 
 public class DeleteLoanCommandHandler : IRequestHandler<DeleteLoanCommand, Unit>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public DeleteLoanCommandHandler(BooksManagementDbContext dbContext)
+    private readonly ILoanRepository _loanRepository;
+    public DeleteLoanCommandHandler(ILoanRepository loanRepository)
     {
-        _dbContext = dbContext;
+        _loanRepository = loanRepository;
     }
     public async Task<Unit> Handle(DeleteLoanCommand request, CancellationToken cancellationToken)
     {
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == request.Id);
+        var loan = await _loanRepository.GetByIdAsync(request.Id);
 
-        _dbContext.Loans.Remove(loan);
-
-        await _dbContext.SaveChangesAsync();
+        await _loanRepository.DeleteAsync(loan);
 
         return Unit.Value;
     }

@@ -1,19 +1,19 @@
-﻿using BookManagement.Infrastructure.Persistence;
+﻿using BookManagement.Core.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.Application.Commands.RenewalLoan;
 
 public class RenewalLoanCommandHandler : IRequestHandler<RenewalLoanCommand, Unit>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public RenewalLoanCommandHandler(BooksManagementDbContext dbContext)
+    private readonly ILoanRepository _loanRepository;
+
+    public RenewalLoanCommandHandler(ILoanRepository loanRepository)
     {
-        _dbContext = dbContext;
+        _loanRepository = loanRepository;
     }
     public async Task<Unit> Handle(RenewalLoanCommand request, CancellationToken cancellationToken)
     {
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == request.Id);
+        var loan = await _loanRepository.GetByIdAsync(request.Id);
 
         var validation = loan.CheckDevolution();
 
@@ -21,9 +21,7 @@ public class RenewalLoanCommandHandler : IRequestHandler<RenewalLoanCommand, Uni
 
         loan.LoanRenewal(newDate);
 
-        _dbContext.Update(loan);
-
-        await _dbContext.SaveChangesAsync();
+        await _loanRepository.UpdateAsync(loan);
 
         return Unit.Value;
     }
