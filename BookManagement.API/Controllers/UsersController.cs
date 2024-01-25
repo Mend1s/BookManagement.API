@@ -1,18 +1,24 @@
-﻿using BookManagement.Application.InputModels;
+﻿using BookManagement.Application.Commands.CreateUser;
+using BookManagement.Application.Commands.DeleteUser;
+using BookManagement.Application.Commands.UpdateUser;
+using BookManagement.Application.InputModels;
 using BookManagement.Application.ViewModels;
-using BookManagement.Core.Entities;
 using BookManagement.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 
 namespace BookManagement.API.Controllers;
 
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
+    private readonly IMediator _mediator;
     private readonly BooksManagementDbContext _dbContext;
-	public UsersController(BooksManagementDbContext dbContext)
+	public UsersController(BooksManagementDbContext dbContext, IMediator mediator)
 	{
+        _mediator = mediator;
 		_dbContext = dbContext;
 	}
 
@@ -51,29 +57,21 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CreateUserInputModel createUserInputModel)
+    public async Task<IActionResult> Post([FromBody] CreateUserCommand command)
     {
-        var user = new User(createUserInputModel.Name, createUserInputModel.Email);
+        if (command is null) return BadRequest();
 
-        await _dbContext.Users.AddAsync(user);
+        var id = await _mediator.Send(command);
 
-        await _dbContext.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, createUserInputModel);
+        return CreatedAtAction(nameof(GetById), new { id = id }, command);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] UpdateUserInputModel updateUserInputModel)
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateUserCommand command)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = new UpdateUserCommand(id, command.Name, command.Email);
 
-        if (user is null) return NotFound();
-
-        user.UpdateUser(updateUserInputModel.Name, updateUserInputModel.Email);
-
-        _dbContext.Users.Update(user);
-
-        await _dbContext.SaveChangesAsync();
+        var result = await _mediator.Send(user);
 
         return NoContent();
     }
@@ -81,13 +79,9 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var command = new DeleteUserCommand(id);
 
-        if (user is null) return NotFound();
-
-        _dbContext.Users.Remove(user);
-
-        await _dbContext.SaveChangesAsync();
+        await _mediator.Send(command);
 
         return NoContent();
     }
