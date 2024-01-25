@@ -2,13 +2,13 @@
 using BookManagement.Application.Commands.DeleteLoan;
 using BookManagement.Application.Commands.RenewalLoan;
 using BookManagement.Application.Commands.UpdateLoan;
-using BookManagement.Application.InputModels;
+using BookManagement.Application.Queries.GetAllLoan;
+using BookManagement.Application.Queries.GetLoanById;
 using BookManagement.Application.ViewModels;
 using BookManagement.Core.Entities;
 using BookManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookManagement.API.Controllers;
 
@@ -26,39 +26,23 @@ public class LoansController : ControllerBase
 	[HttpGet]
 	public async Task<ActionResult<IEnumerable<LoanViewModel>>> GetAll()
 	{
-		var loans = await _dbContext.Loans.ToListAsync();
+        var query = new GetAllLoanQuery();
 
-		if (loans is null) return BadRequest();
+        var result = await _mediator.Send(query);
 
-		var loanViewModel = loans.Select(loan => new LoanViewModel
-		{
-            Id = loan.Id,
-            IdUser = loan.IdUser,
-            IdBook = loan.IdBook,
-            LoanDate = loan.LoanDate,
-            Devolution = loan.Devolution
-        }).ToList();
-
-		return Ok(loanViewModel);
+        return Ok(result);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<ActionResult<LoanViewModel>> GetById(int id)
 	{
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == id);
+        var loanId = new GetLoanByIdQuery(id);
 
-        if (loan is null) return NotFound();
+        var loanResult = await _mediator.Send(loanId);
 
-        var loanViewModel = new LoanViewModel
-		{
-            Id = loan.Id,
-            IdUser = loan.IdUser,
-            IdBook = loan.IdBook,
-            LoanDate = loan.LoanDate,
-            Devolution = loan.Devolution
-        };
-        
-        return Ok(loanViewModel);
+        if (loanResult is null) return NotFound();
+
+        return Ok(loanResult);
     }
 
     [HttpPost]
