@@ -1,5 +1,7 @@
 using BookManagement.Application.Commands.CreateBook;
+using BookManagement.Core.Repositories;
 using BookManagement.Infrastructure.Persistence;
+using BookManagement.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,8 @@ builder.Services.AddDbContext<BooksManagementDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddMediatR(opt => opt.RegisterServicesFromAssembly(typeof(CreateBookCommand).Assembly));
+
+builder.Services.AddScoped<IBookReposiroty, BookRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

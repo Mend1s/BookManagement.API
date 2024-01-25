@@ -1,22 +1,21 @@
 ﻿using BookManagement.Core.Entities;
-using BookManagement.Infrastructure.Persistence;
+using BookManagement.Core.Repositories;
 using MediatR;
 
 namespace BookManagement.Application.Commands.CreateBook;
 
 public class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, int>
 {
-    private readonly BooksManagementDbContext _dbContext;
-    public CreateBookCommandHandler(BooksManagementDbContext dbContext)
+    private readonly IBookReposiroty _bookReposiroty;
+    public CreateBookCommandHandler(IBookReposiroty bookReposiroty)
     {
-        _dbContext = dbContext;
+        _bookReposiroty = bookReposiroty;
     }
     public async Task<int> Handle(CreateBookCommand request, CancellationToken cancellationToken)
     {
         var book = new Book(request.Title, request.Author, request.Isbn, request.YearOfPublication);
 
-        await _dbContext.Books.AddAsync(book);
-        await _dbContext.SaveChangesAsync();
+        await _bookReposiroty.CreateAsync(book);
 
         return book.Id;
     }
