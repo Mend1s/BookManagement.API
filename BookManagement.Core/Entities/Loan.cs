@@ -29,4 +29,13 @@ public class Loan : BaseEntity
     {
         Devolution = date;
     }
+
+    public string CheckDevolution()
+    {
+        if (DateTime.Now >= Devolution)
+        {
+            return("Devolução em atraso! Devolva o livro para criar um novo empréstimo.");      
+        }
+        return "Devolução em dia!";
+    }
 }

@@ -1,7 +1,12 @@
-﻿using BookManagement.Application.InputModels;
+﻿using BookManagement.Application.Commands.CreateLoan;
+using BookManagement.Application.Commands.DeleteLoan;
+using BookManagement.Application.Commands.RenewalLoan;
+using BookManagement.Application.Commands.UpdateLoan;
+using BookManagement.Application.InputModels;
 using BookManagement.Application.ViewModels;
 using BookManagement.Core.Entities;
 using BookManagement.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +15,12 @@ namespace BookManagement.API.Controllers;
 [Route("api/[controller]")]
 public class LoansController : ControllerBase
 {
+    private readonly IMediator _mediator;
 	private readonly BooksManagementDbContext _dbContext;
-	public LoansController(BooksManagementDbContext dbContext)
+	public LoansController(BooksManagementDbContext dbContext, IMediator mediator)
 	{
 		_dbContext = dbContext;
+        _mediator = mediator;
 	}
 
 	[HttpGet]
@@ -55,67 +62,44 @@ public class LoansController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] LoanInputModel createLoanInputModel)
+    public async Task<IActionResult> Post([FromBody] CreateLoanCommand command)
     {
-        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == createLoanInputModel.IdUser);
+        var loan = new Loan(command.IdUser, command.IdBook);
 
-        if (user is null) return NotFound();
+        var result = await _mediator.Send(command);
 
-        var loan = new Loan(createLoanInputModel.IdUser, createLoanInputModel.IdBook);
-
-        await _dbContext.Loans.AddAsync(loan);
-
-        await _dbContext.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = loan.Id }, createLoanInputModel);
+        return CreatedAtAction(nameof(GetById), new { id = loan.Id }, command);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] LoanInputModel LoanInputModel)
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateLoanCommand command)
     {
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == id);
+        var user = new UpdateLoanCommand(id, command.IdUser, command.IdBook);
 
-        if (loan is null) return BadRequest();
+        await _mediator.Send(user);
 
-        loan.UpdateLoan(LoanInputModel.IdUser, LoanInputModel.IdBook);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(loan);
+        return NoContent();
     }
 
     [HttpPut("renewal/{id}")]
     public async Task<IActionResult> Renewal(int id)
     {
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == id);
+        var command = new RenewalLoanCommand(id);
 
-        if (loan is null) return BadRequest();
+        if (command is null) return BadRequest();
 
-        if (DateTime.Now >= loan.Devolution) return BadRequest("Devolução em atraso! Devolva o livro para criar um novo empréstimo.");
+        await _mediator.Send(command);
 
-        var newDate = loan.Devolution.AddDays(10);
-
-        loan.LoanRenewal(newDate);
-
-        _dbContext.Update(loan);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(loan);
+        return Ok();
     }
-    
     
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var loan = await _dbContext.Loans.SingleOrDefaultAsync(l => l.Id == id);
+        var command = new DeleteLoanCommand(id);
 
-        if (loan is null) return NotFound();
+        await _mediator.Send(command);
 
-        _dbContext.Loans.Remove(loan);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(loan);
+        return NoContent();
     }
 }

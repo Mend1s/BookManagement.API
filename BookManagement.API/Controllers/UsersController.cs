@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
     {
         var user = new UpdateUserCommand(id, command.Name, command.Email);
 
-        var result = await _mediator.Send(user);
+        await _mediator.Send(user);
 
         return NoContent();
     }
