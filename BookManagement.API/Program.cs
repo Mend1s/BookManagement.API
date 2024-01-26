@@ -1,7 +1,10 @@
+using BookManagement.API.Filters;
 using BookManagement.Application.Commands.CreateBook;
+using BookManagement.Application.Validators;
 using BookManagement.Core.Repositories;
 using BookManagement.Infrastructure.Persistence;
 using BookManagement.Infrastructure.Persistence.Repositories;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BooksManagementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BookManagement")));
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers(options => options.Filters.Add(typeof(ValidationFilter)))
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateBookCommandValidator>());
+
 builder.Services.AddMediatR(opt => opt.RegisterServicesFromAssembly(typeof(CreateBookCommand).Assembly));
 
 builder.Services.AddScoped<IBookReposiroty, BookRepository>();

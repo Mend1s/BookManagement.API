@@ -68,13 +68,20 @@ public class LoansController : ControllerBase
     [HttpPut("renewal/{id}")]
     public async Task<IActionResult> Renewal(int id)
     {
-        var command = new RenewalLoanCommand(id);
+        try
+        {
+            var command = new RenewalLoanCommand(id);
+            
+            if (command is null) return BadRequest();
 
-        if (command is null) return BadRequest();
-
-        await _mediator.Send(command);
-
-        return Ok();
+            await _mediator.Send(command);
+            
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
     [HttpDelete("{id}")]
