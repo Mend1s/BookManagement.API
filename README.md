@@ -1,9 +1,9 @@
-# Books Management API
+# Books Management API 📚
 
 Bem-vindo ao Books Management API, uma aplicação de gerenciamento de livros/biblioteca desenvolvida em ASP.NET Core 8.
 Esta API oferece funcionalidades robustas para facilitar o controle de usuários, livros e empréstimos na sua biblioteca.
 
-# Tecnologias e práticas utilizadas
+# 🛠 Tecnologias e práticas utilizadas
 
 - API desenvolvida com .NET 8
 - Arquitetura Limpa
@@ -14,14 +14,14 @@ Esta API oferece funcionalidades robustas para facilitar o controle de usuários
 - FluentValidation
 - SQL Server
 
-# Funcionalidades
-CRUD de Usuários, Clientes e Livros:
+# ⚙ Funcionalidades
+- [X] CRUD de Usuários, Clientes e Livros:
 Permite realizar operações básicas de criação, leitura, atualização e exclusão de registros das entidades acima.
 
-Empréstimo de Livros:
+- [X] Empréstimo de Livros:
 Associa um usuário a um livro durante o empréstimo, calculando automaticamente o tempo de empréstimo e a previsão de devolução. Inclui também a opção de renovação do livro.
 
-## Documentação da API
+## 💻 Documentação da API
 
 Utilizado o Swagger para documentar os EndPoints desenvolvidos e auxiliar nos testes da API.
 
